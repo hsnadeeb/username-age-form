@@ -1,6 +1,7 @@
 // src/UserForm.js
 import React, { useState } from "react";
 import "./userForm.css";
+import WarningDialog from "./WarningDialog";
 
 function UserForm({ addUser }) {
   const [formData, setFormData] = useState({
@@ -8,20 +9,38 @@ function UserForm({ addUser }) {
     age: "",
   });
 
+  const [showWarning, setShowWarning] = useState(false);
+  const [warningMessage, setWarningMessage] = useState("");
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (formData.username && formData.age) {
+
+    const { username, age } = formData;
+
+    if (!username || age === "") {
+      setWarningMessage("Please fill in all fields.");
+      setShowWarning(true);
+    } else if (age < 0) {
+      setWarningMessage("Age cannot be negative.");
+      setShowWarning(true);
+    } else {
       addUser(formData);
       setFormData({ username: "", age: "" });
     }
   };
 
+  const closeWarning = () => {
+    setShowWarning(false);
+  };
+
   return (
+    <div>
     <form onSubmit={handleSubmit}>
       <div className="form-group">
         <label htmlFor="username">Username:</label>
@@ -45,6 +64,13 @@ function UserForm({ addUser }) {
       </div>
       <button type="submit">Add User</button>
     </form>
+     <WarningDialog
+     show={showWarning}
+     message={warningMessage}
+     onClose={closeWarning}
+     onChange={handleChange}
+   />
+   </div>
   );
 }
 
